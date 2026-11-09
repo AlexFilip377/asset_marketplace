@@ -10,14 +10,12 @@ pub mod asset_marketplace {
 
     pub fn list_asset(ctx: Context<ListAsset>, price: u64) -> Result<()> {
         let listing = &mut ctx.accounts.listing;
-        
-        // 1. Записываем данные в PDA аккаунт
+
         listing.seller = ctx.accounts.seller.key();
         listing.asset_mint = ctx.accounts.asset_mint.key();
         listing.price = price;
         listing.bump = ctx.bumps.listing;
 
-        // 2. CPI: Переводим токен от продавца в Vault смарт-контракта
         let cpi_accounts = anchor_spl::token::Transfer {
             from: ctx.accounts.seller_token_account.to_account_info(),
             to: ctx.accounts.vault_token_account.to_account_info(),
@@ -25,9 +23,45 @@ pub mod asset_marketplace {
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        
-        // Переводим 1 единицу токена (так как это уникальная моделька/ассет)
+
         anchor_spl::token::transfer(cpi_ctx, 1)?; 
+
+        Ok(())
+    }
+
+    pub fn buy_asset(ctx: Context<BuyAsset>) -> Result<()> {
+        let listing = &ctx.accounts.listing;
+
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            anchor_lang::system_program::Transfer {
+                from: ctx.accounts.buyer.to_account_info(),
+                to: ctx.accounts.seller.to_account_info(),
+            },
+        );
+        anchor_lang::system_program::transfer(cpi_context, listing.price)?;
+
+        let seller_key = listing.seller.key();
+        let mint_key = listing.asset_mint.key();
+        let bump = listing.bump;
+
+        let signer_seeds: &[&[&[u8]]] = &[&[
+            b"listing",
+            seller_key.as_ref(),
+            mint_key.as_ref(),
+            &[bump],
+        ]];
+
+        let cpi_accounts = anchor_spl::token::Transfer {
+            from: ctx.accounts.vault_token_account.to_account_info(),
+            to: ctx.accounts.buyer_token_account.to_account_info(),
+            authority: listing.to_account_info(),
+        };
+        
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        
+        anchor_spl::token::transfer(cpi_ctx, 1)?;
 
         Ok(())
     }
@@ -72,6 +106,37 @@ pub struct ListAsset<'info> {
 
     #[account(mut)]
     pub seller_token_account: Account<'info, TokenAccount>,
+
+    pub asset_mint: Account<'info, Mint>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct BuyAsset<'info> {
+    #[account(mut)]
+    pub buyer: Signer<'info>,
+
+    #[account(mut, address = listing.seller)]
+    pub seller: AccountInfo<'info>,
+
+    #[account(
+        mut,
+        close = seller, 
+        seeds = [b"listing", seller.key().as_ref(), asset_mint.key().as_ref()],
+        bump = listing.bump
+    )]
+    pub listing: Account<'info, Listing>,
+
+    #[account(
+        mut,
+        seeds = [b"vault", listing.key().as_ref()],
+        bump,
+    )]
+    pub vault_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub buyer_token_account: Account<'info, TokenAccount>,
 
     pub asset_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
