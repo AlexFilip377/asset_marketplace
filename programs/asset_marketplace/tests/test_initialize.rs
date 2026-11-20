@@ -1,78 +1,8 @@
-
-use {
-    anchor_lang::{
-        prelude::Pubkey,
-        solana_program::{instruction::Instruction, system_program},
-        AccountDeserialize, InstructionData, ToAccountMetas,
-    },
-    litesvm::LiteSVM,
-    solana_keypair::Keypair,
-    solana_message::{Message, VersionedMessage},
-    solana_signer::Signer,
-    solana_transaction::versioned::VersionedTransaction,
-};
+//! Placeholder: full marketplace integration tests live in `tests/asset_marketplace.ts`.
+//! Rebuild with `anchor build` before running on-chain / LiteSVM tests.
 
 #[test]
-fn test_initialize() {
+fn marketplace_program_id_is_set() {
     let program_id = asset_marketplace::id();
-    let payer = Keypair::new();
-    let counter = Pubkey::find_program_address(
-        &[asset_marketplace::constants::COUNTER_SEED],
-        &program_id,
-    )
-    .0;
-    let mut svm = LiteSVM::new();
-    let bytes = include_bytes!(concat!(
-        env!("CARGO_TARGET_TMPDIR"),
-        "/../deploy/asset_marketplace.so"
-    ));
-    svm.add_program(program_id, bytes).unwrap();
-    svm.airdrop(&payer.pubkey(), 1_000_000_000).unwrap();
-
-    let instruction = Instruction::new_with_bytes(
-        program_id,
-        &asset_marketplace::instruction::Initialize {}.data(),
-        asset_marketplace::accounts::Initialize {
-            payer: payer.pubkey(),
-            counter,
-            system_program: system_program::ID,
-        }
-        .to_account_metas(None),
-    );
-
-    let blockhash = svm.latest_blockhash();
-    let msg = Message::new_with_blockhash(&[instruction], Some(&payer.pubkey()), &blockhash);
-    let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), &[&payer]).unwrap();
-
-    let res = svm.send_transaction(tx);
-    assert!(res.is_ok());
-
-    let counter_account = svm.get_account(&counter).unwrap();
-    let mut data: &[u8] = &counter_account.data;
-    let counter_state = asset_marketplace::state::Counter::try_deserialize(&mut data).unwrap();
-    assert_eq!(counter_state.count, 0);
-    assert_eq!(counter_state.authority, payer.pubkey());
-
-    let instruction = Instruction::new_with_bytes(
-        program_id,
-        &asset_marketplace::instruction::Increment {}.data(),
-        asset_marketplace::accounts::Increment {
-            counter,
-            authority: payer.pubkey(),
-        }
-        .to_account_metas(None),
-    );
-
-    let blockhash = svm.latest_blockhash();
-    let msg = Message::new_with_blockhash(&[instruction], Some(&payer.pubkey()), &blockhash);
-    let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), &[&payer]).unwrap();
-
-    let res = svm.send_transaction(tx);
-    assert!(res.is_ok());
-
-    let counter_account = svm.get_account(&counter).unwrap();
-    let mut data: &[u8] = &counter_account.data;
-    let counter_state = asset_marketplace::state::Counter::try_deserialize(&mut data).unwrap();
-    assert_eq!(counter_state.count, 1);
-    assert_eq!(counter_state.authority, payer.pubkey());
+    assert_ne!(program_id, solana_pubkey::Pubkey::default());
 }

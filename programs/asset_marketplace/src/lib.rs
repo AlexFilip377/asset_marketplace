@@ -15,11 +15,11 @@ declare_id!("CME9UWV8o6muidz2b7suFDbwJuxF5wWVcF6XwgLJXbNR");
 pub mod asset_marketplace {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        crate::instructions::initialize::handle_initialize(ctx)
+    pub fn list_asset(ctx: Context<ListAsset>, price: u64) -> Result<()> {
+        crate::instructions::list_asset::handle_list_asset(ctx, price)
     }
 
-    pub fn increment(ctx: Context<Increment>) -> Result<()> {
-        crate::instructions::increment::handle_increment(ctx)
+    pub fn buy_asset(ctx: Context<BuyAsset>) -> Result<()> {
+        crate::instructions::buy_asset::handle_buy_asset(ctx)
     }
 }
