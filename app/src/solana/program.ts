@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import { AnchorProvider, BN, Program } from '@coral-xyz/anchor'
 import {
   createAssociatedTokenAccountInstruction,
