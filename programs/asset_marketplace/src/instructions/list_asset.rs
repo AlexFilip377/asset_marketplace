@@ -56,7 +56,7 @@ pub fn handle_list_asset(ctx: Context<ListAsset>, price: u64) -> Result<()> {
         to: ctx.accounts.vault_token_account.to_account_info(),
         authority: ctx.accounts.seller.to_account_info(),
     };
-    let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info().key(), cpi_accounts);
+    let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
     token::transfer(cpi_ctx, 1)?;
 
     Ok(())

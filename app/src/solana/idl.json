@@ -1,0 +1,104 @@
+{
+  "address": "CME9UWV8o6muidz2b7suFDbwJuxF5wWVcF6XwgLJXbNR",
+  "metadata": {
+    "name": "asset_marketplace",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "buy_asset",
+      "discriminator": [197, 37, 177, 1, 180, 23, 175, 98],
+      "accounts": [
+        { "name": "buyer", "writable": true, "signer": true },
+        { "name": "seller", "writable": true },
+        {
+          "name": "listing",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              { "kind": "const", "value": [108, 105, 115, 116, 105, 110, 103] },
+              { "kind": "account", "path": "seller" },
+              { "kind": "account", "path": "asset_mint" }
+            ]
+          }
+        },
+        {
+          "name": "vault_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              { "kind": "const", "value": [118, 97, 117, 108, 116] },
+              { "kind": "account", "path": "listing" }
+            ]
+          }
+        },
+        { "name": "buyer_token_account", "writable": true },
+        { "name": "asset_mint" },
+        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" },
+        { "name": "system_program", "address": "11111111111111111111111111111111" }
+      ],
+      "args": []
+    },
+    {
+      "name": "list_asset",
+      "discriminator": [11, 25, 254, 205, 61, 252, 23, 15],
+      "accounts": [
+        { "name": "seller", "writable": true, "signer": true },
+        {
+          "name": "listing",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              { "kind": "const", "value": [108, 105, 115, 116, 105, 110, 103] },
+              { "kind": "account", "path": "seller" },
+              { "kind": "account", "path": "asset_mint" }
+            ]
+          }
+        },
+        {
+          "name": "vault_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              { "kind": "const", "value": [118, 97, 117, 108, 116] },
+              { "kind": "account", "path": "listing" }
+            ]
+          }
+        },
+        { "name": "seller_token_account", "writable": true },
+        { "name": "asset_mint" },
+        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" },
+        { "name": "system_program", "address": "11111111111111111111111111111111" }
+      ],
+      "args": [{ "name": "price", "type": "u64" }]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Listing",
+      "discriminator": [218, 32, 50, 73, 43, 134, 26, 58]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "ListingNotActive", "msg": "Listing is not active" },
+    { "code": 6001, "name": "InvalidPrice", "msg": "Invalid listing price" }
+  ],
+  "types": [
+    {
+      "name": "Listing",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "seller", "type": "pubkey" },
+          { "name": "mint", "type": "pubkey" },
+          { "name": "price", "type": "u64" },
+          { "name": "bump", "type": "u8" },
+          { "name": "vault_bump", "type": "u8" },
+          { "name": "is_active", "type": "bool" }
+        ]
+      }
+    }
+  ]
+}
