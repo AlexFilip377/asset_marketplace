@@ -20,7 +20,7 @@
 
 - **Program ID:** `CME9UWV8o6muidz2b7suFDbwJuxF5wWVcF6XwgLJXbNR`[cite: 19]
 - **Explorer:** [Открыть в Solana Explorer (Devnet)](https://explorer.solana.com/address/CME9UWV8o6muidz2b7suFDbwJuxF5wWVcF6XwgLJXbNR?cluster=devnet)[cite: 19]
-- **Live Demo:** `<ВСТАВЬ_СЮДА_ССЫЛКУ_НА_VERCEL>`
+- **Live Demo:** `<https://asset-marketplace-gilt.vercel.app/>`
 
 ## Структура проекта
 
